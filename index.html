@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrownToys小工具</title>
+</head>
+
+<body>
+    <style>
+        #main table{
+            border-spacing: 0;
+        }
+        #main table td,
+        #main table th {
+            border-left: 1px solid #3a3a3a;
+            border-top: 1px solid #3a3a3a;
+            padding: 2px 5px;
+        }
+        #main table td:last-child ,
+        #main table th:last-child  {
+            border-right: 1px solid #3a3a3a;
+        }
+        #main table tr:last-child td ,
+        #main table tr:last-child th{
+            border-bottom: 1px solid #3a3a3a;
+        }
+        .rank_S{
+            background-color: #c184f1;
+        }
+        .rank_A{
+            background-color: #f1ec84;
+        }
+        .rank_B{
+            background-color: #b4eaf5;
+        }
+        .rank_C{
+            background-color: #e0e0e0;
+        }
+    </style>
+    <div id="main"></div>
+    <script type="module">
+        function loadJson(name) {
+            return fetch(`./json/${name}.json`).then(response => response.json());
+        }
+
+        function data_to_table(data, fields) {
+            const table = document.createElement('table');
+            const headerRow = document.createElement('tr');
+
+            fields.forEach(field => {
+                const th = document.createElement('th');
+                th.textContent = field.label;
+
+                headerRow.appendChild(th);
+            });
+            table.appendChild(headerRow);
+            data.forEach(toy => {
+                const row = document.createElement('tr');
+
+                fields.map(field => {
+                    const cell = document.createElement('td');
+                    const value = toy[field.key] || "";
+                    if(field.key === 'rank' && value) {
+                        cell.classList.add("rank_" + value);
+                    }
+
+                    if (value) {
+                        cell.textContent = field.value ? field.value(value) : value;
+                    }
+
+                    row.appendChild(cell);
+                });
+
+                table.appendChild(row);
+            });
+
+            return table;
+        }
+
+        const toyDisplayFields = [
+            {
+                key: "name",
+                label: "玩具"
+            },
+            {
+                key: "rank",
+                label: "等級"
+            },
+            {
+                key: "coinbase",
+                label: "金幣產量"
+            },
+            {
+                key: "colors",
+                label: "顏色/舞台",
+                value: (arr) => arr.join('')
+            }
+        ];
+        const { Toys: toys_data } = await loadJson('data');
+        const table = data_to_table(toys_data, toyDisplayFields);
+
+        const main = document.getElementById('main');
+        main.append(table);
+    </script>
+</body>
+
+</html>
